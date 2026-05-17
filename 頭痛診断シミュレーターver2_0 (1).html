@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>頭痛診断シミュレーター</title>
+  <meta name="robots" content="index,follow" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy: #0d2240;
+      --navy-mid: #163460;
+      --navy-light: #1e4a8a;
+      --accent: #2a7bbf;
+      --accent-light: #4a9fd4;
+      --teal: #1a8a7a;
+      --teal-light: #e8f5f3;
+      --gold: #c9a84c;
+      --gold-soft: #fdf6e3;
+      --white: #ffffff;
+      --off-white: #f4f7fb;
+      --gray-1: #eaeff7;
+      --gray-2: #c8d6e8;
+      --gray-3: #8fa5c2;
+      --text: #0d2240;
+      --text-muted: #5a7090;
+      --danger: #c0392b;
+      --danger-soft: #fdf0ef;
+      --warning: #c57a1e;
+      --warning-soft: #fef8ee;
+      --success: #1a8a7a;
+      --success-soft: #e8f5f3;
+      --shadow-sm: 0 2px 8px rgba(13,34,64,0.08);
+      --shadow-md: 0 8px 32px rgba(13,34,64,0.12);
+      --shadow-lg: 0 20px 60px rgba(13,34,64,0.16);
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--off-white);
+      color: var(--text);
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    /* ─── HEADER STRIPE ─── */
+    .header-stripe {
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 60%, var(--navy-light) 100%);
+      padding: 0 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header-stripe::before {
+      content: '';
+      position: absolute;
+      right: -60px; top: -60px;
+      width: 240px; height: 240px;
+      border-radius: 50%;
+      background: rgba(42,123,191,0.18);
+      pointer-events: none;
+    }
+
+    .header-stripe::after {
+      content: '';
+      position: absolute;
+      left: -30px; bottom: -80px;
+      width: 180px; height: 180px;
+      border-radius: 50%;
+      background: rgba(201,168,76,0.10);
+      pointer-events: none;
+    }
+
+    .header-inner {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 40px 0 36px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .header-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(201,168,76,0.18);
+      border: 1px solid rgba(201,168,76,0.4);
+      color: var(--gold);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      padding: 5px 14px;
+      border-radius: 999px;
+      margin-bottom: 18px;
+    }
+
+    .header-tag::before {
+      content: '＋';
+      font-size: 0.85em;
+    }
+
+    .header-title {
+      font-family: 'Noto Serif JP', serif;
+      font-size: clamp(1.7rem, 4vw, 2.5rem);
+      font-weight: 700;
+      color: var(--white);
+      line-height: 1.3;
+      letter-spacing: 0.03em;
+      margin-bottom: 14px;
+    }
+
+    .header-divider {
+      width: 56px; height: 3px;
+      background: linear-gradient(90deg, var(--gold), rgba(201,168,76,0.3));
+      border-radius: 999px;
+      margin-bottom: 16px;
+    }
+
+    .header-sub {
+      color: rgba(255,255,255,0.72);
+      font-size: 0.95rem;
+      max-width: 600px;
+      line-height: 1.7;
+    }
+
+    /* ─── ALERT BAR ─── */
+    .alert-bar {
+      background: linear-gradient(135deg, #fff1f0, #fde8e8);
+      border-top: 3px solid var(--danger);
+      padding: 14px 24px;
+    }
+
+    .alert-bar-inner {
+      max-width: 860px;
+      margin: 0 auto;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      color: #8b1a1a;
+      font-size: 0.88rem;
+      line-height: 1.6;
+    }
+
+    .alert-icon {
+      flex-shrink: 0;
+      width: 22px; height: 22px;
+      background: var(--danger);
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-top: 1px;
+    }
+
+    /* ─── MAIN CONTENT ─── */
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 32px 24px 60px;
+    }
+
+    /* ─── CARD ─── */
+    .card {
+      background: var(--white);
+      border: 1px solid var(--gray-1);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      padding: 36px;
+      margin-bottom: 24px;
+    }
+
+    /* ─── PROGRESS ─── */
+    .progress-wrap {
+      margin-bottom: 32px;
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      margin-bottom: 10px;
+      font-weight: 500;
+    }
+
+    .progress-meta strong {
+      color: var(--accent);
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 6px;
+      background: var(--gray-1);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-light));
+      border-radius: 999px;
+      transition: width 0.35s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    /* ─── QUESTIONS ─── */
+    .question {
+      display: none;
+      animation: fadeUp 0.28s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    .question.active { display: block; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .question-num {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--navy), var(--navy-light));
+      color: var(--white);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      padding: 3px 12px;
+      border-radius: 999px;
+      margin-bottom: 10px;
+    }
+
+    .question h2 {
+      font-family: 'Noto Serif JP', serif;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--navy);
+      margin-bottom: 6px;
+      line-height: 1.5;
+    }
+
+    .question .q-desc {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 22px;
+    }
+
+    /* ─── OPTIONS ─── */
+    .options {
+      display: grid;
+      gap: 10px;
+    }
+
+    .option {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border: 1.5px solid var(--gray-2);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      cursor: pointer;
+      transition: border-color 0.18s, background 0.18s, box-shadow 0.18s, transform 0.15s;
+      background: var(--white);
+      position: relative;
+      user-select: none;
+    }
+
+    .option:hover {
+      border-color: var(--accent);
+      background: #f0f6fc;
+      transform: translateX(3px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .option input[type="radio"] {
+      width: 18px; height: 18px;
+      accent-color: var(--accent);
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+
+    .option-label {
+      font-size: 0.98rem;
+      color: var(--text);
+    }
+
+    /* ─── ACTIONS ─── */
+    .actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 13px 28px;
+      font-size: 0.98rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      letter-spacing: 0.03em;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--navy), var(--navy-light));
+      color: var(--white);
+      box-shadow: 0 4px 16px rgba(13,34,64,0.22);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(13,34,64,0.28);
+      filter: brightness(1.08);
+    }
+
+    .btn-secondary {
+      background: var(--gray-1);
+      color: var(--text-muted);
+      border: 1.5px solid var(--gray-2);
+    }
+
+    .btn-secondary:hover {
+      background: var(--gray-2);
+      color: var(--navy);
+    }
+
+    /* ─── RESERVE BUTTON ─── */
+    .btn-reserve {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: linear-gradient(135deg, var(--teal), #138a6a);
+      color: var(--white);
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 17px 36px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: 0 6px 20px rgba(26,138,122,0.30);
+      transition: all 0.2s ease;
+      letter-spacing: 0.04em;
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-reserve::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .btn-reserve:hover::before {
+      left: 100%;
+    }
+
+    .btn-reserve:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(26,138,122,0.38);
+    }
+
+    .btn-reserve svg {
+      width: 20px; height: 20px;
+      flex-shrink: 0;
+    }
+
+    /* ─── RESULT SECTION ─── */
+    #resultSection { display: none; }
+
+    /* ─── INFO CARDS (symptoms / urgency) ─── */
+    .info-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .info-card {
+      border-radius: var(--radius-md);
+      border: 1px solid var(--gray-2);
+      padding: 18px 18px 16px;
+      background: var(--white);
+    }
+
+    .info-card-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .info-card-icon {
+      width: 28px; height: 28px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+
+    .info-card-icon.blue  { background: #e8f1fb; }
+    .info-card-icon.amber { background: #fef3e2; }
+    .info-card-icon.red   { background: #fde8e8; }
+    .info-card-icon.green { background: var(--teal-light); }
+
+    .info-card-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+    }
+
+    .info-card ul {
+      list-style: none;
+      padding: 0; margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .info-card ul li {
+      font-size: 0.9rem;
+      color: var(--text);
+      line-height: 1.6;
+      padding-left: 14px;
+      position: relative;
+    }
+
+    .info-card ul li::before {
+      content: '·';
+      position: absolute;
+      left: 2px;
+      color: var(--accent);
+      font-size: 1.2em;
+      line-height: 1.4;
+    }
+
+    .urgency-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+      margin-bottom: 8px;
+    }
+
+    .urgency-high   { background: #fde8e8; color: var(--danger); }
+    .urgency-mid    { background: var(--warning-soft); color: var(--warning); }
+    .urgency-low    { background: var(--teal-light); color: var(--teal); }
+
+    .urgency-desc {
+      font-size: 0.9rem;
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    @media (max-width: 640px) {
+      .info-cards { grid-template-columns: 1fr; }
+    }
+
+    .result-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 16px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      margin-bottom: 14px;
+    }
+
+    .badge-success { background: var(--teal-light); color: var(--teal); border: 1px solid rgba(26,138,122,0.25); }
+    .badge-warning { background: var(--warning-soft); color: var(--warning); border: 1px solid rgba(197,122,30,0.25); }
+    .badge-danger  { background: var(--danger-soft); color: var(--danger); border: 1px solid rgba(192,57,43,0.25); }
+
+    .result-title {
+      font-family: 'Noto Serif JP', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 10px;
+      line-height: 1.3;
+    }
+
+    .result-desc {
+      color: var(--text-muted);
+      font-size: 0.98rem;
+      margin-bottom: 24px;
+      line-height: 1.8;
+    }
+
+    .advice-box {
+      border-radius: var(--radius-md);
+      padding: 20px 22px;
+      margin-bottom: 24px;
+    }
+
+    .advice-box.success { background: var(--success-soft); border-left: 4px solid var(--teal); }
+    .advice-box.warning { background: var(--warning-soft); border-left: 4px solid var(--warning); }
+    .advice-box.danger  { background: var(--danger-soft);  border-left: 4px solid var(--danger); }
+
+    .advice-box-label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+      opacity: 0.7;
+    }
+
+    .advice-box p {
+      font-size: 0.96rem;
+      line-height: 1.8;
+    }
+
+    /* ─── RESERVE BLOCK ─── */
+    .reserve-block {
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+      border-radius: var(--radius-lg);
+      padding: 32px 28px;
+      margin: 28px 0;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .reserve-block::before {
+      content: '';
+      position: absolute;
+      right: -40px; top: -40px;
+      width: 160px; height: 160px;
+      border-radius: 50%;
+      background: rgba(42,123,191,0.15);
+      pointer-events: none;
+    }
+
+    .reserve-block-eyebrow {
+      color: var(--gold);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      margin-bottom: 8px;
+    }
+
+    .reserve-block-title {
+      font-family: 'Noto Serif JP', serif;
+      color: var(--white);
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .reserve-block-sub {
+      color: rgba(255,255,255,0.65);
+      font-size: 0.88rem;
+      margin-bottom: 22px;
+      line-height: 1.6;
+    }
+
+    /* ─── SCORE LIST ─── */
+    .score-section-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .score-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .score-item {
+      background: var(--off-white);
+      border: 1px solid var(--gray-1);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .score-item-name {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .score-item-val {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--navy);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .score-item.highlighted {
+      background: linear-gradient(135deg, #f0f6fc, #e8f0fa);
+      border-color: var(--accent);
+    }
+
+    .score-item.highlighted .score-item-name { color: var(--navy); font-weight: 600; }
+    .score-item.highlighted .score-item-val { color: var(--accent); }
+
+    /* ─── DISCLAIMER ─── */
+    .disclaimer {
+      background: var(--gray-1);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin-top: 20px;
+    }
+
+    /* ─── RESULT ACTIONS ─── */
+    .result-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 640px) {
+      .card { padding: 22px 18px; }
+      .header-inner { padding: 28px 0 24px; }
+      .score-grid { grid-template-columns: 1fr; }
+      .actions { flex-direction: column-reverse; }
+      .btn { width: 100%; }
+      .result-actions { flex-direction: column; }
+      .result-actions .btn { width: 100%; }
+      .reserve-block { padding: 24px 18px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="header-stripe">
+    <div class="header-inner">
+      <div class="header-tag">頭痛専門外来</div>
+      <h1 class="header-title">頭痛診断シミュレーター</h1>
+      <div class="header-divider"></div>
+      <p class="header-sub">いくつかの問診項目に答えることで、考えられる頭痛タイプを簡易的に提案します。医療機関での診断を置き換えるものではありません。</p>
+    </div>
+  </header>
+
+  <!-- ALERT -->
+  <div class="alert-bar">
+    <div class="alert-bar-inner">
+      <div class="alert-icon">!</div>
+      <div>突然の激しい頭痛・ろれつが回らない・手足の麻痺・意識障害・発熱や項部硬直・けいれん・頭部外傷後の頭痛がある場合は、シミュレーターの結果にかかわらず速やかに受診してください。</div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <main class="container">
+
+    <!-- QUESTION CARD -->
+    <section class="card" id="questionSection">
+      <div class="progress-wrap">
+        <div class="progress-meta">
+          <span id="progressText">質問 1 / 9</span>
+          <span><strong id="progressPercent">11</strong>%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+      </div>
+
+      <form id="simulatorForm">
+
+        <div class="question active" data-question="0">
+          <div class="question-num">Q 1</div>
+          <h2>頭痛は突然、これまでにない強さで起こりましたか？</h2>
+          <p class="q-desc">くも膜下出血などの危険な頭痛を見分けるための項目です。</p>
+          <div class="options">
+            <label class="option"><input type="radio" name="q0" value="yes" /><span class="option-label">はい</span></label>
+            <label class="option"><input type="radio" name="q0" value="no" /><span class="option-label">いいえ</span></label>
+          </div>
+        </div>
+
+        <div class="question" data-question="1">
+          <div class="question-num">Q 2</div>
+          <h2>次のような症状はありますか？</h2>
+          <p class="q-desc">発熱、首の硬さ、意識がぼんやりする、けいれん、ろれつが回らない、片側の手足が動かしにくい など</p>
+          <div class="options">
+            <label class="option"><input type="radio" name="q1" value="yes" /><span class="option-label">はい</span></label>
+            <label class="option"><input type="radio" name="q1" value="no" /><span class="option-label">いいえ</span></label>
+          </div>
+        </div>
+
+        <div class="question" data-question="2">
+          <div class="question-num">Q 3</div>
+          <h2>痛みはどこに強く出ますか？</h2>
+          <p class="q-desc">最も近いものを選んでください。</p>
+          <div class="options">
+            <label class="option"><input type="radio" name="q2" value="oneSide" /><span class="option-label">頭の片側</span></label>
+            <label class="option"><input type="radio" name="q2" value="bothSides" /><span class="option-label">頭全体・両側</span></label>
+            <label class="option"><input type="radio" name="q2" value="aroundEye" /><span class="option-label">片目の奥・目の周囲</span></label>
+          </div>
+        </div>
+
+        <div class="question" data-question="3">
+          <div class="question-num">Q 4</div>
+          <h2>痛み方はどれに近いですか？</h2>
+          <div class="options">
+            <label class="option"><input type="radio" name="q3" value="throbbing" /><span class="option-label">ズキンズキンと脈打つ</span></label>
+            <label class="option"><input type="radio" name="q3" value="tightening" /><span class="option-label">締めつけられる・重い</span></label>
+            <label class="option"><input type="radio" name="q3" value="piercing" /><span class="option-label">えぐられるように強烈</span></label>
+          </div>
+        </div>
+
+        <div class="question" data-question="4">
+          <div class="question-num">Q 5</div>
+          <h2>頭痛のとき、吐き気や光・音への過敏さがありますか？</h2>
+          <div class="options">
+            <label class="option"><input type="radio" name="q4" value="yes" /><span class="option-label">はい</span></label>
+            <label class="option"><input type="radio" name="q4" value="no" /><span class="option-label">いいえ</span></label>
+          </div>
+        </div>
+
+        <div class="question" data-question="5">
+          <div class="question-num">Q 6</div>
+          <h2>頭痛時に、涙・鼻水・鼻づまり・目の充血が片側に出ますか？</h2>
+          <p class="q-desc">群発頭痛の特徴を確認します。</p>
+          <div class="options">
+            <label class="option"><input type="radio" name="q5" value="yes" /><span class="option-label">はい</span></label>
+            <label class="option"><input type="radio" name="q5" value="no" /><span class="option-label">いいえ</span></label>
+          </div>
+        </div>
+
+        <div class="question" data-question="6">
+          <div class="question-num">Q 7</div>
+          <h2>市販薬や鎮痛薬を月に10〜15日以上使うことが続いていますか？</h2>
+          <p class="q-desc">薬の種類によって基準は異なりますが、目安としてお答えください。</p>
+          <div class="options">
+            <label class="option"><input type="radio" name="q6" value="yes" /><span class="option-label">はい</span></label>
+            <label class="option"><input type="radio" name="q6" value="no" /><span class="option-label">いいえ</span></label>
+          </div>
+        </div>
+
+        <div class="question" data-question="7">
+          <div class="question-num">Q 8</div>
+          <h2>頭痛は、ほぼ毎日または頻繁に起こりますか？</h2>
+          <div class="options">
+            <label class="option"><input type="radio" name="q7" value="yes" /><span class="option-label">はい</span></label>
+            <label class="option"><input type="radio" name="q7" value="no" /><span class="option-label">いいえ</span></label>
+          </div>
+        </div>
+
+        <div class="question" data-question="8">
+          <div class="question-num">Q 9</div>
+          <h2>体を動かすと頭痛が悪化しますか？</h2>
+          <div class="options">
+            <label class="option"><input type="radio" name="q8" value="yes" /><span class="option-label">はい</span></label>
+            <label class="option"><input type="radio" name="q8" value="no" /><span class="option-label">いいえ</span></label>
+          </div>
+        </div>
+
+      </form>
+
+      <div class="actions">
+        <button type="button" class="btn btn-secondary" id="prevBtn">&#8592; 戻る</button>
+        <button type="button" class="btn btn-primary" id="nextBtn">次へ &#8594;</button>
+      </div>
+    </section>
+
+    <!-- RESULT CARD -->
+    <section class="card" id="resultSection">
+      <div id="resultContent"></div>
+    </section>
+
+  </main>
+
+  <script>
+    const RESERVE_URL = 'https://patient.digikar-smart.jp/institutions/f0788675-b616-4c9a-bbda-24989035c16f/reserve';
+
+    const questions      = document.querySelectorAll('.question');
+    const nextBtn        = document.getElementById('nextBtn');
+    const prevBtn        = document.getElementById('prevBtn');
+    const questionSection = document.getElementById('questionSection');
+    const resultSection  = document.getElementById('resultSection');
+    const resultContent  = document.getElementById('resultContent');
+    const progressBar    = document.getElementById('progressBar');
+    const progressText   = document.getElementById('progressText');
+    const progressPercent = document.getElementById('progressPercent');
+    const form           = document.getElementById('simulatorForm');
+
+    let current = 0;
+
+    function updateView() {
+      questions.forEach((q, i) => q.classList.toggle('active', i === current));
+      prevBtn.style.visibility = current === 0 ? 'hidden' : 'visible';
+      nextBtn.textContent = current === questions.length - 1 ? '結果を見る →' : '次へ →';
+
+      const percent = Math.round(((current + 1) / questions.length) * 100);
+      progressBar.style.width = percent + '%';
+      progressText.textContent = `質問 ${current + 1} / ${questions.length}`;
+      progressPercent.textContent = percent;
+    }
+
+    function getAnswer(name) {
+      const checked = form.querySelector(`input[name="${name}"]:checked`);
+      return checked ? checked.value : null;
+    }
+
+    function validateCurrent() {
+      return !!getAnswer(`q${current}`);
+    }
+
+    function scoreAnswers() {
+      const answers = {};
+      for (let i = 0; i < questions.length; i++) {
+        answers[`q${i}`] = getAnswer(`q${i}`);
+      }
+      const scores = { migraine: 0, tension: 0, cluster: 0, medication: 0, dangerous: 0 };
+
+      if (answers.q0 === 'yes') scores.dangerous += 5;
+      if (answers.q1 === 'yes') scores.dangerous += 5;
+      if (answers.q2 === 'oneSide')   scores.migraine += 2;
+      if (answers.q2 === 'bothSides') scores.tension  += 2;
+      if (answers.q2 === 'aroundEye') scores.cluster  += 3;
+      if (answers.q3 === 'throbbing')  scores.migraine += 3;
+      if (answers.q3 === 'tightening') scores.tension  += 3;
+      if (answers.q3 === 'piercing')   scores.cluster  += 3;
+      if (answers.q4 === 'yes') scores.migraine += 3;
+      if (answers.q4 === 'no')  scores.tension  += 1;
+      if (answers.q5 === 'yes') scores.cluster  += 4;
+      if (answers.q6 === 'yes') scores.medication += 5;
+      if (answers.q7 === 'yes') scores.medication += 2;
+      if (answers.q6 === 'yes' && answers.q7 === 'yes') scores.medication += 2;
+      if (answers.q8 === 'yes') scores.migraine += 2;
+      if (answers.q8 === 'no')  scores.tension  += 1;
+
+      return { answers, scores };
+    }
+
+    function pickResult(scores) {
+      if (scores.dangerous >= 5) return 'dangerous';
+      const ordered = Object.entries(scores)
+        .filter(([key]) => key !== 'dangerous')
+        .sort((a, b) => b[1] - a[1]);
+      return ordered[0][0];
+    }
+
+    const resultMeta = {
+      migraine: {
+        badgeClass: 'badge-success',
+        label: '提案結果',
+        title: '片頭痛',
+        desc: '片側のズキズキする痛み、吐き気、光や音への過敏さ、体動で悪化する傾向から片頭痛が示唆されます。',
+        symptoms: ['頭の片側がズキンズキンと脈打つように痛む', '痛みは4〜72時間持続することが多い', '吐き気・嘔吐を伴うことがある', '光・音・においに過敏になる', '体を動かすと痛みが強くなる', '前兆（閃輝暗点など）を伴う場合もある'],
+        cause: '脳の血管や三叉神経の過剰な興奮が原因と考えられています。ストレス・睡眠不足・ホルモン変動・天気の変化などが誘因になることがあります。',
+        urgencyLevel: 'low',
+        urgencyLabel: '緊急度：低〜中',
+        urgencyDesc: '生命の危険は少ないものの、生活の質に大きく影響します。月に複数回起こる場合や、日常生活が困難なほど痛みが強い場合は、頭痛外来・神経内科・脳神経外科への受診をお勧めします。予防薬や急性期治療薬で大きく改善できます。',
+        adviceClass: 'success',
+        advice: '暗く静かな場所で安静にし、水分をとりましょう。症状が強い場合や繰り返す場合は、頭痛外来・神経内科・脳神経外科への相談が有効です。',
+        reserveMsg: '片頭痛は適切な予防薬や急性期治療薬で生活の質を大きく改善できます。ぜひ一度ご受診ください。'
+      },
+      tension: {
+        badgeClass: 'badge-success',
+        label: '提案結果',
+        title: '緊張型頭痛',
+        desc: '両側性で締めつけられるような痛み、肩こりやストレスとの関連から緊張型頭痛が考えられます。',
+        symptoms: ['頭全体・両側をギューッと締めつけられる感覚', '重い・圧迫されるような鈍い痛み', '痛みは数十分〜数日続くことがある', '吐き気や光過敏は通常ない、または軽度', '肩こり・首のこりを伴うことが多い', 'ストレスや疲労のあとに起こりやすい'],
+        cause: '首や肩まわりの筋肉の持続的な緊張が原因です。長時間のデスクワーク・スマホ使用・精神的ストレス・睡眠不足・姿勢の悪さなどが主な誘因です。',
+        urgencyLevel: 'low',
+        urgencyLabel: '緊急度：低',
+        urgencyDesc: '日常的に多くみられる頭痛で、緊急性は低いことがほとんどです。ただし週に複数回・毎日のように繰り返す「慢性緊張型頭痛」は、薬物乱用頭痛への移行リスクもあるため、早めの受診と専門的な管理が大切です。',
+        adviceClass: 'success',
+        advice: '長時間の同じ姿勢を避け、首肩をほぐし、睡眠やストレス対策を見直しましょう。慢性化している場合は医療機関での相談がおすすめです。',
+        reserveMsg: '緊張型頭痛の慢性化を防ぐために、早めの受診と生活習慣の見直しが効果的です。'
+      },
+      cluster: {
+        badgeClass: 'badge-warning',
+        label: '提案結果',
+        title: '群発頭痛',
+        desc: '目の奥をえぐられるような激しい片側痛と、涙・鼻水・鼻づまりなどの自律神経症状から群発頭痛が疑われます。',
+        symptoms: ['片側の目の奥をえぐられるような激烈な痛み', '痛みは15分〜3時間続き、ほぼ毎日同じ時間帯に起こる', '涙・鼻水・鼻づまり・目の充血が患側に出る', '痛みが強すぎてじっとしていられないことがある', '数週〜数か月にわたる「群発期」に集中して起こる', '群発期が明けると症状が消える（寛解期）'],
+        cause: '視床下部の活動異常が引き金と考えられています。アルコール・タバコ・血管拡張薬などが群発期中に発作を誘発することがあります。',
+        urgencyLevel: 'mid',
+        urgencyLabel: '緊急度：中〜高',
+        urgencyDesc: '痛みの激しさは頭痛の中でもトップクラスで、「自殺頭痛」と称されることもあるほどです。専門的な治療（純酸素吸入・トリプタン注射・予防薬など）で症状を大幅に軽減できるため、できるだけ早く頭痛外来・神経内科・脳神経外科を受診してください。',
+        adviceClass: 'warning',
+        advice: '群発頭痛は専門的な治療で改善が期待できます。できるだけ早めに頭痛外来・神経内科・脳神経外科を受診してください。',
+        reserveMsg: '群発頭痛は適切な専門治療が非常に重要です。お早めにご受診ください。'
+      },
+      medication: {
+        badgeClass: 'badge-warning',
+        label: '提案結果',
+        title: '薬物乱用頭痛',
+        desc: '鎮痛薬の使用頻度が高く、頭痛が慢性化していることから薬物乱用頭痛の可能性があります。',
+        symptoms: ['月15日以上（トリプタン系は10日以上）の頻繁な鎮痛薬使用', '朝目覚めたときから頭痛があることが多い', '薬を飲めば一時的に楽になるが、すぐに戻る', 'もともとの頭痛（片頭痛・緊張型など）が悪化してきた', '休日や薬をやめると頭痛・吐き気・不安感が出る', '頭痛の頻度が月10日以上に増えてきた'],
+        cause: '鎮痛薬の長期・頻繁な使用によって脳の痛み調節機能が変化し、薬が切れると頭痛を誘発するようになります。市販薬・処方薬いずれでも起こりえます。',
+        urgencyLevel: 'mid',
+        urgencyLabel: '緊急度：中',
+        urgencyDesc: '自己判断での薬の中断は離脱症状（強い頭痛・吐き気など）を引き起こすことがあり危険です。医師の指導のもとで段階的に減薬・断薬し、元の頭痛の予防治療を組み合わせることが根本的な改善につながります。早めの受診をお勧めします。',
+        adviceClass: 'warning',
+        advice: '自己判断で薬を増やすと悪化することがあります。服薬状況を整理し、医療機関で減薬や予防治療について相談してください。',
+        reserveMsg: '薬物乱用頭痛は自己管理が難しい病態です。専門医と一緒に計画的な治療を進めましょう。'
+      },
+      dangerous: {
+        badgeClass: 'badge-danger',
+        label: '要注意',
+        title: '危険な頭痛の可能性',
+        desc: '危険な二次性頭痛を示唆する回答が含まれています。緊急対応が必要な場合があります。',
+        symptoms: ['突然始まった「人生最悪」の激しい頭痛', '発熱・首の硬さ（項部硬直）を伴う頭痛', 'ろれつが回らない・手足の麻痺・視野の異常', '意識がぼんやりする・混乱・けいれん', '頭部外傷のあとから続く頭痛', '50歳以降に初めて出現した強い頭痛'],
+        cause: 'くも膜下出血・脳出血・細菌性髄膜炎・脳腫瘍・硬膜下血腫など、脳や脊髄に関わる重篤な疾患が原因である可能性があります。',
+        urgencyLevel: 'high',
+        urgencyLabel: '緊急度：高',
+        urgencyDesc: '上記のような症状を伴う頭痛は、命に関わる疾患のサインである可能性があります。ためらわず救急車（119番）を呼ぶか、すぐに救急外来を受診してください。このシミュレーターの結果を待たず、今すぐ行動することが最優先です。',
+        adviceClass: 'danger',
+        advice: '突然の激しい頭痛、神経症状、意識障害、発熱・首の硬さなどがある場合は、救急受診を含め速やかな医療機関受診を検討してください。',
+        reserveMsg: '上記の症状がある場合は、救急外来へ。緊急性がない場合は、早めの外来受診をお勧めします。'
+      }
+    };
+
+    function renderResult() {
+      const { scores } = scoreAnswers();
+      const type = pickResult(scores);
+      const meta = resultMeta[type];
+
+      const scoreNames = { migraine: '片頭痛', tension: '緊張型頭痛', cluster: '群発頭痛', medication: '薬物乱用頭痛', dangerous: '危険な頭痛' };
+      const scoreHTML = Object.entries(scores).map(([key, val]) => {
+        const isTop = key === type;
+        return `<div class="score-item${isTop ? ' highlighted' : ''}">
+          <span class="score-item-name">${scoreNames[key]}</span>
+          <span class="score-item-val">${val}</span>
+        </div>`;
+      }).join('');
+
+      const iconMap = { low: { cls: 'green', emoji: '✓' }, mid: { cls: 'amber', emoji: '⚠' }, high: { cls: 'red', emoji: '!' } };
+      const icon = iconMap[meta.urgencyLevel] || iconMap.low;
+      const symptomsHTML = meta.symptoms.map(s => `<li>${s}</li>`).join('');
+
+      resultContent.innerHTML = `
+        <div class="result-badge ${meta.badgeClass}">${meta.label}</div>
+        <h2 class="result-title">${meta.title}</h2>
+        <p class="result-desc">${meta.desc}</p>
+
+        <div class="info-cards">
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="info-card-icon blue">🔍</div>
+              <div class="info-card-title">症状の特徴・原因</div>
+            </div>
+            <ul>${symptomsHTML}</ul>
+            <p style="font-size:0.87rem;color:var(--text-muted);margin-top:10px;line-height:1.65;">${meta.cause}</p>
+          </div>
+          <div class="info-card">
+            <div class="info-card-header">
+              <div class="info-card-icon ${icon.cls}">${icon.emoji}</div>
+              <div class="info-card-title">受診の目安・緊急度</div>
+            </div>
+            <div class="urgency-tag urgency-${meta.urgencyLevel}">${meta.urgencyLabel}</div>
+            <p class="urgency-desc">${meta.urgencyDesc}</p>
+          </div>
+        </div>
+
+        <div class="advice-box ${meta.adviceClass}">
+          <div class="advice-box-label">当院からのアドバイス</div>
+          <p>${meta.advice}</p>
+        </div>
+
+        <div class="reserve-block">
+          <div class="reserve-block-eyebrow">ONLINE RESERVATION</div>
+          <div class="reserve-block-title">診察のご予約はこちらから</div>
+          <div class="reserve-block-sub">${meta.reserveMsg}</div>
+          <a href="${RESERVE_URL}" target="_blank" rel="noopener noreferrer" class="btn-reserve">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            オンライン予約はこちら
+          </a>
+        </div>
+
+        <div class="score-section-title">スコア詳細</div>
+        <div class="score-grid">${scoreHTML}</div>
+
+        <div class="disclaimer">
+          この結果は簡易ロジックによるシミュレーションです。実際の診断では、年齢・既往歴・神経所見・検査結果などを含めた総合判断が必要です。必ず医療機関にご相談ください。
+        </div>
+
+        <div class="result-actions">
+          <button type="button" class="btn btn-secondary" id="restartBtn">&#8635; 最初からやり直す</button>
+          <a href="${RESERVE_URL}" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+            &#128197; 予約する
+          </a>
+        </div>
+      `;
+
+      document.getElementById('restartBtn').addEventListener('click', restart);
+
+      questionSection.style.display = 'none';
+      resultSection.style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function restart() {
+      form.reset();
+      current = 0;
+      resultSection.style.display = 'none';
+      questionSection.style.display = 'block';
+      updateView();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    nextBtn.addEventListener('click', () => {
+      if (!validateCurrent()) {
+        alert('選択肢を1つ選んでください。');
+        return;
+      }
+      if (current === questions.length - 1) {
+        renderResult();
+        return;
+      }
+      current += 1;
+      updateView();
+    });
+
+    prevBtn.addEventListener('click', () => {
+      if (current > 0) { current -= 1; updateView(); }
+    });
+
+    updateView();
+  </script>
+</body>
+</html>
